@@ -61,8 +61,6 @@ interface MaterialRepository : AbstractRepository<Material, Long>
 interface MaterialConsumptionRepository : AbstractRepository<MaterialConsumption, Long> {
     fun findAllByObjectBrigadeId(id: Long, pageable: Pageable): Page<MaterialConsumption>
     fun findAllByEstimateId(id: Long, pageable: Pageable): Page<MaterialConsumption>
-
-
 }
 
 interface ObjectBrigadeRepository : AbstractRepository<ObjectBrigade, Long> {
@@ -83,7 +81,6 @@ interface ObjectMachineryRepository : AbstractRepository<ObjectMachinery, Long> 
 interface PlotRepository : AbstractRepository<Plot, Long> {
     fun findAllByChiefId(id: Long, pageable: Pageable): Page<Plot>
     fun findAllByManagementId(id: Long, pageable: Pageable): Page<Plot>
-
 
 }
 
