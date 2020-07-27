@@ -275,7 +275,7 @@ class ObjectBrigadeController(
 }
 
 @RestController
-@RequestMapping(value = ["/objectBrigades"])
+@RequestMapping(value = ["/objectMachines"])
 class ObjectMachineryController(
     private val repository: ObjectMachineryRepository,
     private val assembler: ObjectMachineryModelAssembler
