@@ -6,28 +6,7 @@ import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.stereotype.Component
 import org.springframework.util.Assert
-import java.util.*
-
-@Component
-class BrigadeModelAssembler : AbstractModelAssembler<Brigade>()
-abstract class AbstractModelAssembler<T : AbstractJpaPersistable<*>> :
-    RepresentationModelAssembler<T, EntityModel<T>> {
-    override fun toCollectionModel(entities: MutableIterable<T>): CollectionModel<EntityModel<T>> {
-        Assert.notNull(entities, "entities must not be null!")
-        val resourceList: MutableList<EntityModel<T>> =
-            ArrayList()
-
-        for (entity in entities) {
-            resourceList.add(toModel(entity))
-        }
-
-        val resources = CollectionModel.of(resourceList)
-        return resources
-    }
-
-    override fun toModel(entity: T): EntityModel<T> =
-        EntityModel.of(entity)
-}
+import java.util.ArrayList
 
 @Component
 class TitleCategoryModelAssembler : AbstractModelAssembler<TitleCategory>()
@@ -89,3 +68,24 @@ class WorkTypeModelAssembler : AbstractModelAssembler<WorkType>()
 @Component
 class BrigadeMemberModelAssembler : AbstractModelAssembler<BrigadeMember>()
 
+@Component
+class BrigadeModelAssembler : AbstractModelAssembler<Brigade>()
+
+abstract class AbstractModelAssembler<T : AbstractJpaPersistable<*>> :
+    RepresentationModelAssembler<T, EntityModel<T>> {
+    override fun toCollectionModel(entities: MutableIterable<T>): CollectionModel<EntityModel<T>> {
+        Assert.notNull(entities, "entities must not be null!")
+        val resourceList: MutableList<EntityModel<T>> =
+            ArrayList()
+
+        for (entity in entities) {
+            resourceList.add(toModel(entity))
+        }
+
+        val resources = CollectionModel.of(resourceList)
+        return resources
+    }
+
+    override fun toModel(entity: T): EntityModel<T> =
+        EntityModel.of(entity)
+}

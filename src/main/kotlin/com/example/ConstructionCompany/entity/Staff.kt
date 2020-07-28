@@ -22,7 +22,5 @@ class Staff(
     @ManyToOne
     var chief: Staff? = null
 
-//    @OneToMany(mappedBy = "staff")
-//    var staffById: MutableCollection<Staff>? = null
 
 ) : AbstractJpaPersistable<Long>()

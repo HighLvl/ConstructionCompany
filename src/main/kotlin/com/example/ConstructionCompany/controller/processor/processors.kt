@@ -1,168 +1,196 @@
 package com.example.ConstructionCompany.controller.processor
 
 import com.example.ConstructionCompany.applyBasePath
+import com.example.ConstructionCompany.controller.AbstractController
 import com.example.ConstructionCompany.entity.*
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.server.RepresentationModelProcessor
 import org.springframework.stereotype.Component
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.findAnnotation
 
-abstract class AbstractProcessor<T : AbstractJpaPersistable<*>> : RepresentationModelProcessor<EntityModel<T>> {
-    protected fun EntityModel<T>.addLink(href: String, relation: String) {
-        this.add(applyBasePath(Link.of(href).withRel(relation)))
-    }
-}
+abstract class AbstractProcessor<T : AbstractJpaPersistable<*>>(private val processorHelper: ProcessorHelper) :
+    RepresentationModelProcessor<EntityModel<T>> {
 
-@Component
-class BrigadeProcessor : AbstractProcessor<Brigade>() {
-    override fun process(model: EntityModel<Brigade>): EntityModel<Brigade> {
-        model.addLink("/brigadeMembers/brigade/${model.content?.id}", "members")
-        model.addLink("/objectBrigades/brigade/${model.content?.id}", "objects")
-        model.addLink("/titles/${model.content?.title?.id}", "title")
+    override fun process(model: EntityModel<T>): EntityModel<T> {
+        model.addManyToOneLinks()
+        model.addOneToManyLinks()
         return model
     }
-}
 
-@Component
-class TitleCategoryProcessor : AbstractProcessor<TitleCategory>() {
-    override fun process(model: EntityModel<TitleCategory>): EntityModel<TitleCategory> {
-        model.addLink("/titles/titleCategory/${model.content?.id}", "titles")
-        return model
+    private fun EntityModel<T>.addManyToOneLinks() {
+        val properties =
+            processorHelper.getManyToOneProperties(content!!::class as KClass<AbstractJpaPersistable<*>>)
+        for (property in properties) {
+            addManyToOneLink(property as KProperty1<T, *>)
+        }
+    }
+
+    private fun EntityModel<T>.addOneToManyLinks() {
+        val functionPropertyNamePairs =
+            processorHelper.getOneToManyFunctions(content!!::class as KClass<AbstractJpaPersistable<*>>)
+        for (pair in functionPropertyNamePairs) {
+            addOneToManyLink(pair.first, pair.second)
+        }
+    }
+
+    private fun EntityModel<T>.addOneToManyLink(function: KFunction<*>, propertyName: String) {
+        addLink(
+            function,
+            this.content!!.id!!,
+             function.requestMappingUrl().trim('/').capitalize() + "_" + propertyName.capitalize()
+        )
+    }
+
+    private fun EntityModel<T>.addManyToOneLink(
+        property: KProperty1<T, *>
+    ) {
+        val persistable = (property.get(this.content!!) ?: return) as AbstractJpaPersistable<*>
+        val entityController = processorHelper.map(persistable::class as KClass<AbstractJpaPersistable<*>>)
+        addLink(
+            entityController::class as KClass<AbstractController<*, *>>,
+            entityController::getById,
+            persistable.id!!,
+            property.name
+        )
+    }
+
+    private fun EntityModel<T>.addLink(
+        kClass: KClass<AbstractController<*, *>>,
+        function: KFunction<*>,
+        id: Any,
+        relation: String
+    ) {
+        this.add(applyBasePath(function.link(kClass).expand(id).withRel(relation)))
+    }
+
+    private fun EntityModel<T>.addLink(function: KFunction<*>, id: Any, relation: String) {
+        this.add(applyBasePath(function.link().expand(id).withRel(relation)))
+    }
+
+    private fun KFunction<*>.link(kClass: KClass<AbstractController<*, *>>): Link {
+        val getMappingUrl = this.findAnnotation<GetMapping>()!!.value[0]
+        return Link.of((requestMappingUrl(kClass).trimEnd('/') + getMappingUrl))
+    }
+
+    private fun KFunction<*>.link(): Link {
+        val getMappingUrl = this.findAnnotation<GetMapping>()!!.value[0]
+        return Link.of((requestMappingUrl().trimEnd('/') + getMappingUrl))
+    }
+
+
+    private fun requestMappingUrl(kClass: KClass<AbstractController<*, *>>): String {
+        return kClass.findAnnotation<RequestMapping>()!!.value[0]
+    }
+
+    private fun KFunction<*>.requestMappingUrl(): String {
+        return (this.parameters[0].type.classifier as KClass<*>).findAnnotation<RequestMapping>()!!.value[0]
     }
 }
 
 @Component
-class TitleProcessor : AbstractProcessor<Title>() {
-    override fun process(model: EntityModel<Title>): EntityModel<Title> {
-        model.addLink("/titleCategories/${model.content?.titleCategory?.id}", "titleCategory")
-        model.addLink("/brigades/title/${model.content?.id}", "brigades")
-        model.addLink("/staff/title/${model.content?.id}", "staff")
-        return model
-    }
-}
+class BrigadeProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<Brigade>(
+    processorHelper
+)
 
 @Component
-class BrigadeMemberProcessor : AbstractProcessor<BrigadeMember>() {
-    override fun process(model: EntityModel<BrigadeMember>): EntityModel<BrigadeMember> {
-        TODO("Not yet implemented")
-    }
-}
+class TitleCategoryProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<TitleCategory>(
+    processorHelper
+)
 
 @Component
-class BuildObjectProcessor : AbstractProcessor<BuildObject>() {
-    override fun process(model: EntityModel<BuildObject>): EntityModel<BuildObject> {
-        TODO("Not yet implemented")
-    }
-}
+class TitleProcessor(processorHelper: ProcessorHelper) :
+    AbstractProcessor<Title>(processorHelper)
 
 @Component
-class CustomerProcessor : AbstractProcessor<Customer>() {
-    override fun process(model: EntityModel<Customer>): EntityModel<Customer> {
-        TODO("Not yet implemented")
-    }
-}
+class BrigadeMemberProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<BrigadeMember>(
+    processorHelper
+)
 
 @Component
-class EstimateProcessor : AbstractProcessor<Estimate>() {
-    override fun process(model: EntityModel<Estimate>): EntityModel<Estimate> {
-        TODO("Not yet implemented")
-    }
-}
+class BuildObjectProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<BuildObject>(
+    processorHelper
+)
 
 @Component
-class MachineryProcessor : AbstractProcessor<Machinery>() {
-    override fun process(model: EntityModel<Machinery>): EntityModel<Machinery> {
-        TODO("Not yet implemented")
-    }
-}
+class CustomerProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<Customer>(
+    processorHelper
+)
 
 @Component
-class MachineryModelProcessor : AbstractProcessor<MachineryModel>() {
-    override fun process(model: EntityModel<MachineryModel>): EntityModel<MachineryModel> {
-        TODO("Not yet implemented")
-    }
-}
+class EstimateProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<Estimate>(
+    processorHelper
+)
 
 @Component
-class MachineryTypeProcessor : AbstractProcessor<MachineryType>() {
-    override fun process(model: EntityModel<MachineryType>): EntityModel<MachineryType> {
-        TODO("Not yet implemented")
-    }
-}
+class MachineryProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<Machinery>(
+    processorHelper
+)
 
 @Component
-class ManagementProcessor : AbstractProcessor<Management>() {
-    override fun process(model: EntityModel<Management>): EntityModel<Management> {
-        TODO("Not yet implemented")
-    }
-}
+class MachineryModelProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<MachineryModel>(
+    processorHelper
+)
 
 @Component
-class MaterialProcessor : AbstractProcessor<Material>() {
-    override fun process(model: EntityModel<Material>): EntityModel<Material> {
-        TODO("Not yet implemented")
-    }
-}
+class MachineryTypeProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<MachineryType>(
+    processorHelper
+)
 
 @Component
-class MaterialConsumptionProcessor : AbstractProcessor<MaterialConsumption>() {
-    override fun process(model: EntityModel<MaterialConsumption>): EntityModel<MaterialConsumption> {
-        TODO("Not yet implemented")
-    }
-}
+class ManagementProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<Management>(
+    processorHelper
+)
 
 @Component
-class ObjectBrigadeProcessor : AbstractProcessor<ObjectBrigade>() {
-    override fun process(model: EntityModel<ObjectBrigade>): EntityModel<ObjectBrigade> {
-        TODO("Not yet implemented")
-    }
-}
+class MaterialProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<Material>(
+    processorHelper
+)
 
 @Component
-class ObjectMachineryProcessor : AbstractProcessor<ObjectMachinery>() {
-    override fun process(model: EntityModel<ObjectMachinery>): EntityModel<ObjectMachinery> {
-        TODO("Not yet implemented")
-    }
-}
+class MaterialConsumptionProcessor(processorHelper: ProcessorHelper) :
+    AbstractProcessor<MaterialConsumption>(
+        processorHelper
+    )
 
 @Component
-class PlotProcessor : AbstractProcessor<Plot>() {
-    override fun process(model: EntityModel<Plot>): EntityModel<Plot> {
-        TODO("Not yet implemented")
-    }
-}
+class ObjectBrigadeProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<ObjectBrigade>(
+    processorHelper
+)
 
 @Component
-class PrototypeProcessor : AbstractProcessor<Prototype>() {
-    override fun process(model: EntityModel<Prototype>): EntityModel<Prototype> {
-        TODO("Not yet implemented")
-    }
-}
+class ObjectMachineryProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<ObjectMachinery>(
+    processorHelper
+)
 
 @Component
-class PrototypeTypeProcessor : AbstractProcessor<PrototypeType>() {
-    override fun process(model: EntityModel<PrototypeType>): EntityModel<PrototypeType> {
-        TODO("Not yet implemented")
-    }
-}
+class PlotProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<Plot>(processorHelper)
 
 @Component
-class StaffProcessor : AbstractProcessor<Staff>() {
-    override fun process(model: EntityModel<Staff>): EntityModel<Staff> {
-        TODO("Not yet implemented")
-    }
-}
+class PrototypeProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<Prototype>(
+    processorHelper
+)
 
 @Component
-class WorkScheduleProcessor : AbstractProcessor<WorkSchedule>() {
-    override fun process(model: EntityModel<WorkSchedule>): EntityModel<WorkSchedule> {
-        TODO("Not yet implemented")
-    }
-}
+class PrototypeTypeProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<PrototypeType>(
+    processorHelper
+)
 
 @Component
-class WorkTypeProcessor : AbstractProcessor<WorkType>() {
-    override fun process(model: EntityModel<WorkType>): EntityModel<WorkType> {
-        TODO("Not yet implemented")
-    }
-}
+class StaffProcessor(processorHelper: ProcessorHelper) :
+    AbstractProcessor<Staff>(processorHelper)
+
+@Component
+class WorkScheduleProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<WorkSchedule>(
+    processorHelper
+)
+
+@Component
+class WorkTypeProcessor(processorHelper: ProcessorHelper) : AbstractProcessor<WorkType>(
+    processorHelper
+)
