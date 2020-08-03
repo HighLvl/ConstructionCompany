@@ -31,7 +31,7 @@ class ProcessorHelper {
         val map = mutableMapOf<KClass<AbstractJpaPersistable<*>>, MutableSet<KProperty1<*, *>>>()
         entityControllerMap.keys.forEach { map[it] = mutableSetOf() }
         for (entity in entityControllerMap.keys) {
-            val properties = entity::memberProperties.get() as Collection<KProperty1<AbstractJpaPersistable<*>, *>>
+            val properties = entity::memberProperties.get()
             for (property in properties) {
                 val propertyClass = property.returnType.classifier as KClass<*>
                 if (propertyClass in entityControllerMap.keys) {
@@ -49,7 +49,7 @@ class ProcessorHelper {
             val controller = map(entry.key)
             for (property in entry.value) {
                 val function = controller::class::memberFunctions.get().firstOrNull {
-                    it.name == "findAllBy" + property.name.capitalize() + "Id"
+                    it.name == ONE_TO_MANY_FUN_NAME_PREFIX + property.name.capitalize() + ONE_TO_MANY_FUN_NAME_SUFFIX
                 } ?: continue
 
                 map[property.returnType.classifier]!!.add(Pair(function, property.name))
@@ -67,5 +67,8 @@ class ProcessorHelper {
         return entityControllerMap.getValue(kClass)
     }
 
-
+    companion object {
+        private const val ONE_TO_MANY_FUN_NAME_PREFIX = "findAllBy"
+        private const val ONE_TO_MANY_FUN_NAME_SUFFIX = "Id"
+    }
 }

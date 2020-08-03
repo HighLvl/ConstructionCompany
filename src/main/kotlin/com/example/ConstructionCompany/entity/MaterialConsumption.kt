@@ -7,15 +7,15 @@ import javax.persistence.*
 class MaterialConsumption(
 
     @Column(name = "amount", nullable = false)
-        @Basic
-        var amount: Int = 0,
+    @Basic
+    var amount: Int = 0,
 
     @JoinColumn(name = "brigade_object_id", referencedColumnName = "id", nullable = false)
-        @ManyToOne
-        var objectBrigade: ObjectBrigade? = null,
+    @ManyToOne
+    var objectBrigade: ObjectBrigade? = null,
 
     @JoinColumn(name = "estimate_id", referencedColumnName = "id", nullable = false)
-        @ManyToOne
-        var estimate: Estimate? = null
+    @ManyToOne
+    var estimate: Estimate? = null
 
 ) : AbstractJpaPersistable<Long>()

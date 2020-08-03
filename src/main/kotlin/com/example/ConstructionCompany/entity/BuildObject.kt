@@ -1,6 +1,7 @@
 package com.example.ConstructionCompany.entity
 
 import java.sql.Date
+import java.time.LocalDate
 import javax.persistence.*
 
 @Entity
@@ -8,24 +9,24 @@ import javax.persistence.*
 class BuildObject(
 
     @Column(name = "start_date", nullable = false)
-        @Basic
-        var startDate: Date? = null,
+    @Basic
+    var startDate: LocalDate? = null,
 
     @Column(name = "finish_date", nullable = true)
-        @Basic
-        var finishDate: Date? = null,
+    @Basic
+    var finishDate: LocalDate? = null,
 
     @JoinColumn(name = "prototype_id", referencedColumnName = "id", nullable = false)
-        @ManyToOne
-        var prototype: Prototype? = null,
+    @ManyToOne
+    var prototype: Prototype? = null,
 
     @JoinColumn(name = "plot_id", referencedColumnName = "id", nullable = false)
-        @ManyToOne
-        var plot: Plot? = null,
+    @ManyToOne
+    var plot: Plot? = null,
 
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
-        @ManyToOne
-        var customer: Customer? = null
+    @ManyToOne
+    var customer: Customer? = null
 
 
 ) : AbstractJpaPersistable<Long>()

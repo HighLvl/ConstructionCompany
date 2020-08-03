@@ -6,7 +6,7 @@ import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.stereotype.Component
 import org.springframework.util.Assert
-import java.util.ArrayList
+import java.util.*
 
 @Component
 class TitleCategoryModelAssembler : AbstractModelAssembler<TitleCategory>()

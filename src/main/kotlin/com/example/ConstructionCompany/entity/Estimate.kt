@@ -7,14 +7,14 @@ import javax.persistence.*
 class Estimate(
 
     @Column(name = "amount", nullable = false)
-        @Basic
-        var amount: Int = 0,
+    @Basic
+    var amount: Int = 0,
 
     @JoinColumn(name = "work_shedule_id", referencedColumnName = "id", nullable = false)
-        @ManyToOne
-        var workSchedule: WorkSchedule? = null,
+    @ManyToOne
+    var workSchedule: WorkSchedule? = null,
 
     @JoinColumn(name = "material_id", referencedColumnName = "id", nullable = false)
-        @ManyToOne
-        var material: Material? = null
+    @ManyToOne
+    var material: Material? = null
 ) : AbstractJpaPersistable<Long>()

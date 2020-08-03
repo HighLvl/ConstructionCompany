@@ -1,6 +1,7 @@
 package com.example.ConstructionCompany.entity
 
 import java.sql.Date
+import java.time.LocalDate
 import javax.persistence.*
 
 @Entity
@@ -9,11 +10,11 @@ class ObjectBrigade(
 
     @Column(name = "start_date", nullable = false)
     @Basic
-    var startDate: Date? = null,
+    var startDate: LocalDate? = null,
 
     @Column(name = "finish_date", nullable = true)
     @Basic
-    var finishDate: Date? = null,
+    var finishDate: LocalDate? = null,
 
     @JoinColumn(name = "brigade_id", referencedColumnName = "id", nullable = false)
     @ManyToOne

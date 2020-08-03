@@ -35,8 +35,9 @@ abstract class AbstractPagedModelProcessor<T : AbstractJpaPersistable<*>>(
             val entityControllerClass =
                 processorHelper.map(property.returnType.classifier as KClass<AbstractJpaPersistable<*>>)::class as KClass<AbstractController<*, *>>
             val requestMappingPath = requestMappingUrl(entityControllerClass).trimEnd('/')
-            addManyToOneLink(requestMappingPath, property as KProperty1<T, *>)
-            content.forEach { it.addManyToOneLink(requestMappingPath, property) }
+            val relation = MANY_TO_ONE_PREFIX + "_" + property.name
+            addManyToOneLink(requestMappingPath, relation)
+            content.forEach { it.addManyToOneLink(requestMappingPath, property as KProperty1<T, *>, relation) }
         }
     }
 
@@ -45,7 +46,7 @@ abstract class AbstractPagedModelProcessor<T : AbstractJpaPersistable<*>>(
             processorHelper.getOneToManyFunctions(entityClass)
         for (pair in functionPropertyNamePairs) {
             val requestMappingPath = requestMappingUrl(pair.first).trimEnd('/')
-            val relation = "referencing_" + requestMappingPath.trimStart('/').capitalize() + "_" + pair.second.capitalize()
+            val relation = ONE_TO_MANY_PREFIX + "_" + requestMappingPath.trimStart('/') + "_" + pair.second
             addOneToManyLink(requestMappingPath, relation)
             content.forEach { it.addOneToManyLink(pair.first, requestMappingPath, relation) }
         }
@@ -61,15 +62,19 @@ abstract class AbstractPagedModelProcessor<T : AbstractJpaPersistable<*>>(
     }
 
 
-    private fun PagedModel<EntityModel<T>>.addManyToOneLink(requestMappingPath: String, property: KProperty1<T, *>) {
-        this.add(applyBasePath(Link.of(requestMappingPath).withRel(property.name)))
+    private fun PagedModel<EntityModel<T>>.addManyToOneLink(requestMappingPath: String, relation: String) {
+        this.add(applyBasePath(Link.of(requestMappingPath).withRel(relation)))
     }
 
-    private fun EntityModel<T>.addManyToOneLink(requestMappingPath: String, property: KProperty1<T, *>) {
+    private fun EntityModel<T>.addManyToOneLink(
+        requestMappingPath: String,
+        property: KProperty1<T, *>,
+        relation: String
+    ) {
         val persistable = (property.get(this.content!!) ?: return) as AbstractJpaPersistable<*>
         val id = persistable.id
         val getMappingPath = AbstractController<*, *>::getById.findAnnotation<GetMapping>()!!.value[0]
-        this.add(applyBasePath(Link.of(requestMappingPath + getMappingPath).expand(id).withRel(property.name)))
+        this.add(applyBasePath(Link.of(requestMappingPath + getMappingPath).expand(id).withRel(relation)))
 
     }
 
@@ -81,6 +86,11 @@ abstract class AbstractPagedModelProcessor<T : AbstractJpaPersistable<*>>(
     private fun requestMappingUrl(function: KFunction<*>): String {
         return (function.parameters[0].type.classifier as KClass<*>).findAnnotation<RequestMapping>()!!.value[0]
     }
+
+    companion object {
+        const val ONE_TO_MANY_PREFIX = "referencing"
+        const val MANY_TO_ONE_PREFIX = "referred"
+    }
 }
 
 @Component
@@ -88,64 +98,80 @@ class BrigadeProcessor(processorHelper: ProcessorHelper) :
     AbstractPagedModelProcessor<Brigade>(Brigade::class, processorHelper)
 
 @Component
-class TitleCategoryProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<TitleCategory>(TitleCategory::class, processorHelper)
+class TitleCategoryProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<TitleCategory>(TitleCategory::class, processorHelper)
 
 @Component
 class TitleProcessor(processorHelper: ProcessorHelper) :
     AbstractPagedModelProcessor<Title>(Title::class, processorHelper)
 
 @Component
-class BrigadeMemberProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<BrigadeMember>(BrigadeMember::class, processorHelper)
+class BrigadeMemberProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<BrigadeMember>(BrigadeMember::class, processorHelper)
 
 @Component
-class BuildObjectProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<BuildObject>(BuildObject::class, processorHelper)
+class BuildObjectProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<BuildObject>(BuildObject::class, processorHelper)
 
 @Component
-class CustomerProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<Customer>(Customer::class, processorHelper)
+class CustomerProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<Customer>(Customer::class, processorHelper)
 
 @Component
-class EstimateProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<Estimate>(Estimate::class, processorHelper)
+class EstimateProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<Estimate>(Estimate::class, processorHelper)
 
 @Component
-class MachineryProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<Machinery>(Machinery::class, processorHelper)
+class MachineryProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<Machinery>(Machinery::class, processorHelper)
 
 @Component
-class MachineryModelProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<MachineryModel>(MachineryModel::class, processorHelper)
+class MachineryModelProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<MachineryModel>(MachineryModel::class, processorHelper)
 
 @Component
-class MachineryTypeProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<MachineryType>(MachineryType::class, processorHelper)
+class MachineryTypeProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<MachineryType>(MachineryType::class, processorHelper)
 
 @Component
-class ManagementProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<Management>(Management::class, processorHelper)
+class ManagementProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<Management>(Management::class, processorHelper)
 
 @Component
-class MaterialProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<Material>(Material::class, processorHelper)
+class MaterialProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<Material>(Material::class, processorHelper)
 
 @Component
 class MaterialConsumptionProcessor(processorHelper: ProcessorHelper) :
     AbstractPagedModelProcessor<MaterialConsumption>(MaterialConsumption::class, processorHelper)
 
 @Component
-class ObjectBrigadeProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<ObjectBrigade>(ObjectBrigade::class, processorHelper)
+class ObjectBrigadeProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<ObjectBrigade>(ObjectBrigade::class, processorHelper)
 
 @Component
-class ObjectMachineryProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<ObjectMachinery>(ObjectMachinery::class, processorHelper)
+class ObjectMachineryProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<ObjectMachinery>(ObjectMachinery::class, processorHelper)
 
 @Component
 class PlotProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<Plot>(Plot::class, processorHelper)
 
 @Component
-class PrototypeProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<Prototype>(Prototype::class, processorHelper)
+class PrototypeProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<Prototype>(Prototype::class, processorHelper)
 
 @Component
-class PrototypeTypeProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<PrototypeType>(PrototypeType::class, processorHelper)
+class PrototypeTypeProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<PrototypeType>(PrototypeType::class, processorHelper)
 
 @Component
 class StaffProcessor(processorHelper: ProcessorHelper) :
     AbstractPagedModelProcessor<Staff>(Staff::class, processorHelper)
 
 @Component
-class WorkScheduleProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<WorkSchedule>(WorkSchedule::class, processorHelper)
+class WorkScheduleProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<WorkSchedule>(WorkSchedule::class, processorHelper)
 
 @Component
-class WorkTypeProcessor(processorHelper: ProcessorHelper) : AbstractPagedModelProcessor<WorkType>(WorkType::class, processorHelper)
+class WorkTypeProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<WorkType>(WorkType::class, processorHelper)

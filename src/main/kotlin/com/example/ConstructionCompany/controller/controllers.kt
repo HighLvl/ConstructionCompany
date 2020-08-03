@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*
 import java.io.Serializable
 import java.lang.reflect.ParameterizedType
 import javax.servlet.http.HttpServletRequest
-import kotlin.reflect.KClass
+
 
 @RestController
 @RequestMapping(value = ["/brigades"])
@@ -484,7 +484,8 @@ abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<
     private val repository: AbstractRepository<T, ID>,
     private val assembler: AbstractModelAssembler<T>
 ) {
-    val entityClass = ((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[1] as Class<AbstractJpaPersistable<*>>).kotlin
+    val entityClass =
+        ((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[1] as Class<AbstractJpaPersistable<*>>).kotlin
 
 
     @GetMapping("/{id}")
@@ -549,14 +550,14 @@ abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<
         page: Page<T>,
         assembler: AbstractModelAssembler<T>,
         request: HttpServletRequest
-    ): ResponseEntity<PagedModel<EntityModel<T>>> =
-        ResponseEntity.ok(
+    ): ResponseEntity<PagedModel<EntityModel<T>>> {
+        return ResponseEntity.ok(
             pagedAssembler.toModel(
                 page,
                 assembler,
-                applyBasePath(
-                    Link.of(request.servletPath)
-                )
+                applyBasePath(Link.of(request.servletPath))
             )
         )
+
+    }
 }
