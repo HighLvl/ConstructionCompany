@@ -3,9 +3,15 @@ package com.example.ConstructionCompany.controller
 import com.example.ConstructionCompany.applyBasePath
 import com.example.ConstructionCompany.controller.assembler.*
 import com.example.ConstructionCompany.entity.*
-import com.example.ConstructionCompany.repository.*
+import com.example.ConstructionCompany.service.*
+import com.example.ConstructionCompany.service.filter.CustomRsqlVisitor
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import cz.jirutka.rsql.parser.RSQLParser
+import cz.jirutka.rsql.parser.ast.Node
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
@@ -20,9 +26,9 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 @RequestMapping(value = ["/brigades"])
 class BrigadeController(
-    private val repository: BrigadeRepository,
+    private val service: BrigadeService,
     private val assembler: BrigadeModelAssembler
-) : AbstractController<Long, Brigade>(repository, assembler) {
+) : AbstractController<Long, Brigade>(service, assembler) {
     @GetMapping("/title/{id}")
     fun findAllByTitleId(
         @PathVariable id: Long,
@@ -30,7 +36,7 @@ class BrigadeController(
         pagedAssembler: PagedResourcesAssembler<Brigade>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<Brigade>>> {
-        val page = repository.findAllByTitleId(id, pageable)
+        val page = service.findAllByTitleId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 }
@@ -38,9 +44,9 @@ class BrigadeController(
 @RestController
 @RequestMapping(value = ["/brigadeMembers"])
 class BrigadeMemberController(
-    private val repository: BrigadeMemberRepository,
+    private val service: BrigadeMemberService,
     private val assembler: BrigadeMemberModelAssembler
-) : AbstractController<Long, BrigadeMember>(repository, assembler) {
+) : AbstractController<Long, BrigadeMember>(service, assembler) {
 
     @GetMapping("/brigade/{id}")
     fun findAllByBrigadeId(
@@ -49,7 +55,7 @@ class BrigadeMemberController(
         pagedAssembler: PagedResourcesAssembler<BrigadeMember>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<BrigadeMember>>> {
-        val page = repository.findAllByBrigadeId(id, pageable)
+        val page = service.findAllByBrigadeId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -60,7 +66,7 @@ class BrigadeMemberController(
         pagedAssembler: PagedResourcesAssembler<BrigadeMember>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<BrigadeMember>>> {
-        val page = repository.findAllByStaffId(id, pageable)
+        val page = service.findAllByStaffId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 }
@@ -68,9 +74,9 @@ class BrigadeMemberController(
 @RestController
 @RequestMapping(value = ["/buildObjects"])
 class BuildObjectController(
-    private val repository: BuildObjectRepository,
+    private val service: BuildObjectService,
     private val assembler: BuildObjectModelAssembler
-) : AbstractController<Long, BuildObject>(repository, assembler) {
+) : AbstractController<Long, BuildObject>(service, assembler) {
 
     @GetMapping("/prototype/{id}")
     fun findAllByPrototypeId(
@@ -79,7 +85,7 @@ class BuildObjectController(
         pagedAssembler: PagedResourcesAssembler<BuildObject>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<BuildObject>>> {
-        val page = repository.findAllByPrototypeId(id, pageable)
+        val page = service.findAllByPrototypeId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -90,7 +96,7 @@ class BuildObjectController(
         pagedAssembler: PagedResourcesAssembler<BuildObject>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<BuildObject>>> {
-        val page = repository.findAllByPlotId(id, pageable)
+        val page = service.findAllByPlotId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -101,7 +107,7 @@ class BuildObjectController(
         pagedAssembler: PagedResourcesAssembler<BuildObject>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<BuildObject>>> {
-        val page = repository.findAllByCustomerId(id, pageable)
+        val page = service.findAllByCustomerId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 }
@@ -109,9 +115,9 @@ class BuildObjectController(
 @RestController
 @RequestMapping(value = ["/estimates"])
 class EstimateController(
-    private val repository: EstimateRepository,
+    private val service: EstimateService,
     private val assembler: EstimateModelAssembler
-) : AbstractController<Long, Estimate>(repository, assembler) {
+) : AbstractController<Long, Estimate>(service, assembler) {
 
     @GetMapping("/workSchedule/{id}")
     fun findAllByWorkScheduleId(
@@ -120,7 +126,7 @@ class EstimateController(
         pagedAssembler: PagedResourcesAssembler<Estimate>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<Estimate>>> {
-        val page = repository.findAllByWorkScheduleId(id, pageable)
+        val page = service.findAllByWorkScheduleId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -132,7 +138,7 @@ class EstimateController(
         pagedAssembler: PagedResourcesAssembler<Estimate>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<Estimate>>> {
-        val page = repository.findAllByMaterialId(id, pageable)
+        val page = service.findAllByMaterialId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 }
@@ -140,9 +146,9 @@ class EstimateController(
 @RestController
 @RequestMapping(value = ["/machines"])
 class MachineryController(
-    private val repository: MachineryRepository,
+    private val service: MachineryService,
     private val assembler: MachineryModelAssembler
-) : AbstractController<Long, Machinery>(repository, assembler) {
+) : AbstractController<Long, Machinery>(service, assembler) {
 
     @GetMapping("/model/{id}")
     fun findAllByModelId(
@@ -151,7 +157,7 @@ class MachineryController(
         pagedAssembler: PagedResourcesAssembler<Machinery>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<Machinery>>> {
-        val page = repository.findAllByModelId(id, pageable)
+        val page = service.findAllByModelId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -162,7 +168,7 @@ class MachineryController(
         pagedAssembler: PagedResourcesAssembler<Machinery>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<Machinery>>> {
-        val page = repository.findAllByManagementId(id, pageable)
+        val page = service.findAllByManagementId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 }
@@ -170,9 +176,9 @@ class MachineryController(
 @RestController
 @RequestMapping(value = ["/machineryModels"])
 class MachineryModelController(
-    private val repository: MachineryModelRepository,
+    private val service: MachineryModelService,
     private val assembler: MachineryModelModelAssembler
-) : AbstractController<Long, MachineryModel>(repository, assembler) {
+) : AbstractController<Long, MachineryModel>(service, assembler) {
 
     @GetMapping("/machineryType/{id}")
     fun findAllByMachineryTypeId(
@@ -181,7 +187,7 @@ class MachineryModelController(
         pagedAssembler: PagedResourcesAssembler<MachineryModel>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<MachineryModel>>> {
-        val page = repository.findAllByMachineryTypeId(id, pageable)
+        val page = service.findAllByMachineryTypeId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 }
@@ -189,9 +195,9 @@ class MachineryModelController(
 @RestController
 @RequestMapping(value = ["/managements"])
 class ManagementController(
-    private val repository: ManagementRepository,
+    private val service: ManagementService,
     private val assembler: ManagementModelAssembler
-) : AbstractController<Long, Management>(repository, assembler) {
+) : AbstractController<Long, Management>(service, assembler) {
 
     @GetMapping("/chief/{id}")
     fun findAllByChiefId(
@@ -200,7 +206,7 @@ class ManagementController(
         pagedAssembler: PagedResourcesAssembler<Management>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<Management>>> {
-        val page = repository.findAllByChiefId(id, pageable)
+        val page = service.findAllByChiefId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 }
@@ -208,9 +214,9 @@ class ManagementController(
 @RestController
 @RequestMapping(value = ["/materialConsumptions"])
 class MaterialConsumptionController(
-    private val repository: MaterialConsumptionRepository,
+    private val service: MaterialConsumptionService,
     private val assembler: MaterialConsumptionModelAssembler
-) : AbstractController<Long, MaterialConsumption>(repository, assembler) {
+) : AbstractController<Long, MaterialConsumption>(service, assembler) {
 
     @GetMapping("/objectBrigade/{id}")
     fun findAllByObjectBrigadeId(
@@ -219,7 +225,7 @@ class MaterialConsumptionController(
         pagedAssembler: PagedResourcesAssembler<MaterialConsumption>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<MaterialConsumption>>> {
-        val page = repository.findAllByObjectBrigadeId(id, pageable)
+        val page = service.findAllByObjectBrigadeId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -230,7 +236,7 @@ class MaterialConsumptionController(
         pagedAssembler: PagedResourcesAssembler<MaterialConsumption>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<MaterialConsumption>>> {
-        val page = repository.findAllByEstimateId(id, pageable)
+        val page = service.findAllByEstimateId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 }
@@ -238,9 +244,9 @@ class MaterialConsumptionController(
 @RestController
 @RequestMapping(value = ["/objectBrigades"])
 class ObjectBrigadeController(
-    private val repository: ObjectBrigadeRepository,
+    private val service: ObjectBrigadeService,
     private val assembler: ObjectBrigadeModelAssembler
-) : AbstractController<Long, ObjectBrigade>(repository, assembler) {
+) : AbstractController<Long, ObjectBrigade>(service, assembler) {
 
     @GetMapping("/brigade/{id}")
     fun findAllByBrigadeId(
@@ -249,7 +255,7 @@ class ObjectBrigadeController(
         pagedAssembler: PagedResourcesAssembler<ObjectBrigade>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<ObjectBrigade>>> {
-        val page = repository.findAllByBrigadeId(id, pageable)
+        val page = service.findAllByBrigadeId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -260,7 +266,7 @@ class ObjectBrigadeController(
         pagedAssembler: PagedResourcesAssembler<ObjectBrigade>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<ObjectBrigade>>> {
-        val page = repository.findAllByBuildObjectId(id, pageable)
+        val page = service.findAllByBuildObjectId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -271,7 +277,7 @@ class ObjectBrigadeController(
         pagedAssembler: PagedResourcesAssembler<ObjectBrigade>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<ObjectBrigade>>> {
-        val page = repository.findAllByWorkScheduleId(id, pageable)
+        val page = service.findAllByWorkScheduleId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -280,9 +286,9 @@ class ObjectBrigadeController(
 @RestController
 @RequestMapping(value = ["/objectMachines"])
 class ObjectMachineryController(
-    private val repository: ObjectMachineryRepository,
+    private val service: ObjectMachineryService,
     private val assembler: ObjectMachineryModelAssembler
-) : AbstractController<Long, ObjectMachinery>(repository, assembler) {
+) : AbstractController<Long, ObjectMachinery>(service, assembler) {
 
     @GetMapping("/buildObject/{id}")
     fun findAllByBuildObjectId(
@@ -291,7 +297,7 @@ class ObjectMachineryController(
         pagedAssembler: PagedResourcesAssembler<ObjectMachinery>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<ObjectMachinery>>> {
-        val page = repository.findAllByBuildObjectId(id, pageable)
+        val page = service.findAllByBuildObjectId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -302,7 +308,7 @@ class ObjectMachineryController(
         pagedAssembler: PagedResourcesAssembler<ObjectMachinery>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<ObjectMachinery>>> {
-        val page = repository.findAllByMachineryId(id, pageable)
+        val page = service.findAllByMachineryId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -313,9 +319,9 @@ class ObjectMachineryController(
 @RestController
 @RequestMapping(value = ["/plots"])
 class PlotController(
-    private val repository: PlotRepository,
+    private val service: PlotService,
     private val assembler: PlotModelAssembler
-) : AbstractController<Long, Plot>(repository, assembler) {
+) : AbstractController<Long, Plot>(service, assembler) {
 
     @GetMapping("/chief/{id}")
     fun findAllByChiefId(
@@ -324,7 +330,7 @@ class PlotController(
         pagedAssembler: PagedResourcesAssembler<Plot>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<Plot>>> {
-        val page = repository.findAllByChiefId(id, pageable)
+        val page = service.findAllByChiefId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -335,7 +341,7 @@ class PlotController(
         pagedAssembler: PagedResourcesAssembler<Plot>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<Plot>>> {
-        val page = repository.findAllByManagementId(id, pageable)
+        val page = service.findAllByManagementId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 }
@@ -343,9 +349,9 @@ class PlotController(
 @RestController
 @RequestMapping(value = ["/prototypes"])
 class PrototypeController(
-    private val repository: PrototypeRepository,
+    private val service: PrototypeService,
     private val assembler: PrototypeModelAssembler
-) : AbstractController<Long, Prototype>(repository, assembler) {
+) : AbstractController<Long, Prototype>(service, assembler) {
 
     @GetMapping("/prototypeType/{id}")
     fun findAllByPrototypeTypeId(
@@ -354,7 +360,7 @@ class PrototypeController(
         pagedAssembler: PagedResourcesAssembler<Prototype>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<Prototype>>> {
-        val page = repository.findAllByPrototypeTypeId(id, pageable)
+        val page = service.findAllByPrototypeTypeId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -364,9 +370,9 @@ class PrototypeController(
 @RestController
 @RequestMapping(value = ["/titles"])
 class TitleController(
-    private val repository: TitleRepository,
+    private val service: TitleService,
     private val assembler: TitleModelAssembler
-) : AbstractController<Long, Title>(repository, assembler) {
+) : AbstractController<Long, Title>(service, assembler) {
 
     @GetMapping("/titleCategory/{id}")
     fun findAllByTitleCategoryId(
@@ -375,7 +381,7 @@ class TitleController(
         pagedAssembler: PagedResourcesAssembler<Title>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<Title>>> {
-        val page = repository.findAllByTitleCategoryId(id, pageable)
+        val page = service.findAllByTitleCategoryId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 }
@@ -383,51 +389,51 @@ class TitleController(
 @RestController
 @RequestMapping(value = ["/titleCategories"])
 class TitleCategoryController(
-    private val repository: TitleCategoryRepository,
+    private val service: TitleCategoryService,
     private val assembler: TitleCategoryModelAssembler
-) : AbstractController<Long, TitleCategory>(repository, assembler)
+) : AbstractController<Long, TitleCategory>(service, assembler)
 
 @RestController
 @RequestMapping(value = ["/workTypes"])
 class WorkTypeController(
-    private val repository: WorkTypeRepository,
+    private val service: WorkTypeService,
     private val assembler: WorkTypeModelAssembler
-) : AbstractController<Long, WorkType>(repository, assembler)
+) : AbstractController<Long, WorkType>(service, assembler)
 
 @RestController
 @RequestMapping(value = ["/prototypeTypes"])
 class PrototypeTypeController(
-    private val repository: PrototypeTypeRepository,
+    private val service: PrototypeTypeService,
     private val assembler: PrototypeTypeModelAssembler
-) : AbstractController<Long, PrototypeType>(repository, assembler)
+) : AbstractController<Long, PrototypeType>(service, assembler)
 
 @RestController
 @RequestMapping(value = ["/materials"])
 class MaterialController(
-    private val repository: MaterialRepository,
+    private val service: MaterialService,
     private val assembler: MaterialModelAssembler
-) : AbstractController<Long, Material>(repository, assembler)
+) : AbstractController<Long, Material>(service, assembler)
 
 @RestController
 @RequestMapping(value = ["/machineryTypes"])
 class MachineryTypeController(
-    private val repository: MachineryTypeRepository,
+    private val service: MachineryTypeService,
     private val assembler: MachineryTypeModelAssembler
-) : AbstractController<Long, MachineryType>(repository, assembler)
+) : AbstractController<Long, MachineryType>(service, assembler)
 
 @RestController
 @RequestMapping(value = ["/customers"])
 class CustomerController(
-    private val repository: CustomerRepository,
+    private val service: CustomerService,
     private val assembler: CustomerModelAssembler
-) : AbstractController<Long, Customer>(repository, assembler)
+) : AbstractController<Long, Customer>(service, assembler)
 
 @RestController
 @RequestMapping(value = ["/staff"])
 class StaffController(
-    private val repository: StaffRepository,
+    private val service: StaffService,
     private val assembler: StaffModelAssembler
-) : AbstractController<Long, Staff>(repository, assembler) {
+) : AbstractController<Long, Staff>(service, assembler) {
     @GetMapping("/title/{id}")
     fun findAllByTitleId(
         @PathVariable id: Long,
@@ -435,7 +441,7 @@ class StaffController(
         pagedAssembler: PagedResourcesAssembler<Staff>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<Staff>>> {
-        val page = repository.findAllByTitleId(id, pageable)
+        val page = service.findAllByTitleId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -446,7 +452,7 @@ class StaffController(
         pagedAssembler: PagedResourcesAssembler<Staff>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<Staff>>> {
-        val page = repository.findAllByChiefId(id, pageable)
+        val page = service.findAllByChiefId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 }
@@ -454,9 +460,9 @@ class StaffController(
 @RestController
 @RequestMapping(value = ["/workSchedules"])
 class WorkScheduleController(
-    private val repository: WorkScheduleRepository,
+    private val service: WorkScheduleService,
     private val assembler: WorkScheduleModelAssembler
-) : AbstractController<Long, WorkSchedule>(repository, assembler) {
+) : AbstractController<Long, WorkSchedule>(service, assembler) {
     @GetMapping("/prototype/{id}")
     fun findAllByPrototypeId(
         @PathVariable id: Long,
@@ -464,7 +470,7 @@ class WorkScheduleController(
         pagedAssembler: PagedResourcesAssembler<WorkSchedule>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<WorkSchedule>>> {
-        val page = repository.findAllByPrototypeId(id, pageable)
+        val page = service.findAllByPrototypeId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -475,13 +481,13 @@ class WorkScheduleController(
         pagedAssembler: PagedResourcesAssembler<WorkSchedule>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<WorkSchedule>>> {
-        val page = repository.findAllByWorkTypeId(id, pageable)
+        val page = service.findAllByWorkTypeId(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 }
 
 abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<ID>>(
-    private val repository: AbstractRepository<T, ID>,
+    private val service: AbstractService<T, ID>,
     private val assembler: AbstractModelAssembler<T>
 ) {
     val entityClass =
@@ -495,7 +501,7 @@ abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<
         pagedAssembler: PagedResourcesAssembler<T>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<T>>> {
-        val page = repository.findById(id, pageable)
+        val page = service.findById(id, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -506,7 +512,7 @@ abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<
         pagedAssembler: PagedResourcesAssembler<T>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<T>>> {
-        val page = repository.findAll(pageable)
+        val page = service.findAll(pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
@@ -517,32 +523,53 @@ abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<
         pagedAssembler: PagedResourcesAssembler<T>,
         request: HttpServletRequest
     ): ResponseEntity<PagedModel<EntityModel<T>>> {
-        val page = repository.findAllByIdIn(collection, pageable)
+        val page = service.findAllByIdIn(collection, pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
     @PostMapping("/")
     fun save(
         @RequestBody entity: T
-    ) = ResponseEntity.ok(repository.save(entity))
+    ) = ResponseEntity.ok(service.save(entity))
 
     @PutMapping("/collection")
     fun saveAll(
-        @RequestBody collection: Collection<T>
-    ) = ResponseEntity.ok(repository.saveAll(collection))
+        @RequestBody json: String
+    ) {
+        val objectMapper = jacksonObjectMapper()
+        objectMapper.registerModule(JavaTimeModule())
+        val typeFactory = objectMapper.typeFactory
+        val collection = objectMapper.readValue<Collection<T>>(
+            json,
+            typeFactory.constructCollectionType(Collection::class.java, entityClass.java)
+        )
+        ResponseEntity.ok(service.saveAll(collection))
+    }
 
 
     @DeleteMapping("/{id}")
     fun deleteById(
         @PathVariable id: ID
-    ) = repository.deleteById(id).let { ResponseEntity.ok().build<Any>() }
+    ) = service.deleteById(id).let { ResponseEntity.ok().build<Any>() }
 
 
     @DeleteMapping("/collection")
-    fun deleteAllById(
-        @RequestParam("id") collection: Collection<ID>
-    ) = repository.deleteAll(repository.findAllById(collection)).let {
+    fun deleteAll(
+        @RequestParam("id") ids: Collection<ID>
+    ) = service.deleteByIdIn(ids).let {
         ResponseEntity.ok().build<Any>()
+    }
+
+    @GetMapping("/search")
+    @ResponseBody
+    open fun findAllByRsql(@RequestParam("filter") filter: String,
+                           pageable: Pageable,
+                           pagedAssembler: PagedResourcesAssembler<T>,
+                           request: HttpServletRequest): ResponseEntity<PagedModel<EntityModel<T>>> {
+        val rootNode: Node = RSQLParser().parse(filter)
+        val spec: Specification<T>? = rootNode.accept(CustomRsqlVisitor())
+        val page = service.findAll(spec, pageable)
+        return toResponse(pagedAssembler, page, assembler, request)
     }
 
     protected fun toResponse(

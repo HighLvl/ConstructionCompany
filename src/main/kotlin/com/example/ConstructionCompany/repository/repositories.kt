@@ -3,6 +3,7 @@ package com.example.ConstructionCompany.repository
 import com.example.ConstructionCompany.entity.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.data.repository.PagingAndSortingRepository
 
@@ -10,6 +11,8 @@ import org.springframework.data.repository.PagingAndSortingRepository
 interface AbstractRepository<T, ID> : PagingAndSortingRepository<T, ID> {
     fun findAllByIdIn(ids: Iterable<ID>, pageable: Pageable): Page<T>
     fun findById(id: ID, pageable: Pageable): Page<T>
+    fun deleteByIdIn(ids: Collection<ID>)
+    fun findAll(spec: Specification<T>?, pageable: Pageable): Page<T>
 }
 
 interface BrigadeMemberRepository : AbstractRepository<BrigadeMember, Long> {
