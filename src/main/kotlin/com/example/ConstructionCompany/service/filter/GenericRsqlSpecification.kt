@@ -101,7 +101,7 @@ class GenericRsqlSpecification<T>(
                 Boolean::class.java -> return@map arg.toBoolean()
                 LocalDate::class.java -> return@map LocalDate.parse(arg, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                 else -> {
-                    if(property == "id") return@map arg.toLong()
+                    if(property.contains("^id\$|\\.id\$".toRegex())) return@map arg.toLong()
                     return@map arg
                 }
             }

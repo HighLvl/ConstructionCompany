@@ -11,10 +11,6 @@ import java.io.Serializable
 
 
 abstract class AbstractService<T : AbstractJpaPersistable<ID>, ID : Serializable>(private val repository: AbstractRepository<T, ID>) {
-    fun findAllByIdIn(ids: Iterable<ID>, pageable: Pageable): Page<T> {
-        return repository.findAllByIdIn(ids, pageable)
-    }
-
     @Transactional
     open fun findById(id: ID, pageable: Pageable): Page<T> {
         return repository.findById(id, pageable)
@@ -27,19 +23,9 @@ abstract class AbstractService<T : AbstractJpaPersistable<ID>, ID : Serializable
     }
 
     @Transactional
-    open fun save(entity: T): T {
-        return repository.save(entity)
-    }
-
-    @Transactional
     open fun saveAll(collection: Collection<T>): MutableIterable<T> {
         return repository.saveAll(collection)
     }
-
-    fun deleteById(id: ID) {
-        repository.deleteById(id)
-    }
-
 
     @Transactional
     open fun findAll(pageable: Pageable): Page<T> {
@@ -81,7 +67,7 @@ class BuildObjectService(private val repository: BuildObjectRepository) :
     }
 
     fun findAllByPlotId(id: Long, pageable: Pageable): Page<BuildObject> {
-        return repository.findAllByCustomerId(id, pageable)
+        return repository.findAllByPlotId(id, pageable)
     }
 
     fun findAllByCustomerId(id: Long, pageable: Pageable): Page<BuildObject> {

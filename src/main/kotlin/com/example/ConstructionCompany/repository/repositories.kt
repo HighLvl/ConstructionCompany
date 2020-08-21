@@ -9,7 +9,6 @@ import org.springframework.data.repository.PagingAndSortingRepository
 
 @NoRepositoryBean
 interface AbstractRepository<T, ID> : PagingAndSortingRepository<T, ID> {
-    fun findAllByIdIn(ids: Iterable<ID>, pageable: Pageable): Page<T>
     fun findById(id: ID, pageable: Pageable): Page<T>
     fun deleteByIdIn(ids: Collection<ID>)
     fun findAll(spec: Specification<T>?, pageable: Pageable): Page<T>

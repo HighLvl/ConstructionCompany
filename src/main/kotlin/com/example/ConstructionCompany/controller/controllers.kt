@@ -516,22 +516,6 @@ abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
-    @GetMapping("/collection")
-    fun getAllById(
-        @RequestParam("id") collection: Collection<ID>,
-        pageable: Pageable,
-        pagedAssembler: PagedResourcesAssembler<T>,
-        request: HttpServletRequest
-    ): ResponseEntity<PagedModel<EntityModel<T>>> {
-        val page = service.findAllByIdIn(collection, pageable)
-        return toResponse(pagedAssembler, page, assembler, request)
-    }
-
-    @PostMapping("/")
-    fun save(
-        @RequestBody entity: T
-    ) = ResponseEntity.ok(service.save(entity))
-
     @PutMapping("/collection")
     fun saveAll(
         @RequestBody json: String
@@ -545,12 +529,6 @@ abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<
         )
         ResponseEntity.ok(service.saveAll(collection))
     }
-
-
-    @DeleteMapping("/{id}")
-    fun deleteById(
-        @PathVariable id: ID
-    ) = service.deleteById(id).let { ResponseEntity.ok().build<Any>() }
 
 
     @DeleteMapping("/collection")
