@@ -230,3 +230,6 @@ class WorkScheduleService(private val repository: WorkScheduleRepository) :
 
 @Service
 class WorkTypeService(private val repository: WorkTypeRepository) : AbstractService<WorkType, Long>(repository)
+
+@Service
+class ReportService(private val repository: ReportRepository) : AbstractService<Report, Long>(repository)

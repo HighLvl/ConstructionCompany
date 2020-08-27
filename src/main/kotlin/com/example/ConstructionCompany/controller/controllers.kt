@@ -519,7 +519,7 @@ abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<
     @PutMapping("/collection")
     fun saveAll(
         @RequestBody json: String
-    ) {
+    ): ResponseEntity<MutableIterable<T>> {
         val objectMapper = jacksonObjectMapper()
         objectMapper.registerModule(JavaTimeModule())
         val typeFactory = objectMapper.typeFactory
@@ -527,7 +527,7 @@ abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<
             json,
             typeFactory.constructCollectionType(Collection::class.java, entityClass.java)
         )
-        ResponseEntity.ok(service.saveAll(collection))
+        return ResponseEntity.ok(service.saveAll(collection))
     }
 
 
@@ -544,13 +544,16 @@ abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<
                            pageable: Pageable,
                            pagedAssembler: PagedResourcesAssembler<T>,
                            request: HttpServletRequest): ResponseEntity<PagedModel<EntityModel<T>>> {
-        val rootNode: Node = RSQLParser().parse(filter)
-        val spec: Specification<T>? = rootNode.accept(CustomRsqlVisitor())
-        val page = service.findAll(spec, pageable)
+        val page = service.findAll(convertToSpecifications(filter), pageable)
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
-    protected fun toResponse(
+    protected fun <S: AbstractJpaPersistable<*>>convertToSpecifications(filter: String): Specification<S>? {
+        val rootNode: Node = RSQLParser().parse(filter)
+        return rootNode.accept(CustomRsqlVisitor())
+    }
+
+    protected fun <T: AbstractJpaPersistable<*>>toResponse(
         pagedAssembler: PagedResourcesAssembler<T>,
         page: Page<T>,
         assembler: AbstractModelAssembler<T>,
@@ -566,3 +569,10 @@ abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<
 
     }
 }
+
+@RestController
+@RequestMapping(value = ["/report"])
+class ReportController(
+    private val service: ReportService,
+    private val assembler: ReportModelAssembler
+) : AbstractController<Long, Report>(service, assembler)

@@ -112,3 +112,5 @@ interface WorkScheduleRepository : AbstractRepository<WorkSchedule, Long> {
 }
 
 interface WorkTypeRepository : AbstractRepository<WorkType, Long>
+
+interface ReportRepository : AbstractRepository<Report, Long>

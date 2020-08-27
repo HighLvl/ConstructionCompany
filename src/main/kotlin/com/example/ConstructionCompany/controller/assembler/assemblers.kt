@@ -71,6 +71,9 @@ class BrigadeMemberModelAssembler : AbstractModelAssembler<BrigadeMember>()
 @Component
 class BrigadeModelAssembler : AbstractModelAssembler<Brigade>()
 
+@Component
+class ReportModelAssembler : AbstractModelAssembler<Report>()
+
 abstract class AbstractModelAssembler<T : AbstractJpaPersistable<*>> :
     RepresentationModelAssembler<T, EntityModel<T>> {
     override fun toCollectionModel(entities: MutableIterable<T>): CollectionModel<EntityModel<T>> {

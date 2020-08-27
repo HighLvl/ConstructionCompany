@@ -1,16 +1,29 @@
 package com.example.ConstructionCompany.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import org.hibernate.annotations.GenericGenerator
+import org.hibernate.boot.model.naming.Identifier
+import org.hibernate.boot.model.relational.QualifiedName
+import org.hibernate.boot.model.relational.QualifiedNameParser
+import org.hibernate.dialect.Dialect
+import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment
+import org.hibernate.id.enhanced.SequenceStyleGenerator
+import org.hibernate.service.ServiceRegistry
 import org.springframework.data.domain.Persistable
 import org.springframework.data.util.ProxyUtils
 import java.io.Serializable
+import java.util.*
 import javax.persistence.*
 
 
 @MappedSuperclass
 abstract class AbstractJpaPersistable<T : Serializable> : Persistable<T> {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GenericGenerator(
+        name = "sequenceGenerator",
+        strategy = "com.example.ConstructionCompany.entity.MaxIdSequenceGenerator"
+    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     private var id: T? = null
 
     override fun getId(): T? {
@@ -43,4 +56,23 @@ abstract class AbstractJpaPersistable<T : Serializable> : Persistable<T> {
         private val serialVersionUID = -5554308939380869754L
     }
 
+
+}
+
+class MaxIdSequenceGenerator : SequenceStyleGenerator() {
+    override fun determineSequenceName(
+        params: Properties?,
+        dialect: Dialect?,
+        jdbcEnv: JdbcEnvironment?,
+        serviceRegistry: ServiceRegistry?
+    ): QualifiedName {
+        val qualifiedName = super.determineSequenceName(params, dialect, jdbcEnv, serviceRegistry)
+        val sequenceName = params!!.getProperty(TABLE) + "_" + params.getProperty(PK) + "_seq"
+
+        return QualifiedNameParser.NameParts(
+            qualifiedName.catalogName,
+            qualifiedName.schemaName,
+            Identifier.toIdentifier(sequenceName)
+        )
+    }
 }
