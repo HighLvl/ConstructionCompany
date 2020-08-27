@@ -17,7 +17,7 @@ import javax.persistence.*
 
 
 @MappedSuperclass
-abstract class AbstractJpaPersistable<T : Serializable> : Persistable<T> {
+abstract class MutablePersistable<T : Serializable> : Persistable<T> {
     @Id
     @GenericGenerator(
         name = "sequenceGenerator",
@@ -43,7 +43,7 @@ abstract class AbstractJpaPersistable<T : Serializable> : Persistable<T> {
 
         if (javaClass != ProxyUtils.getUserClass(other)) return false
 
-        other as AbstractJpaPersistable<*>
+        other as MutablePersistable<*>
 
         return if (null == this.getId()) false else this.getId() == other.getId()
     }

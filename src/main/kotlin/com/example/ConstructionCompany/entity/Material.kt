@@ -14,4 +14,4 @@ class Material(
     var name: String? = null
 
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

@@ -18,4 +18,4 @@ class MaterialConsumption(
     @ManyToOne
     var estimate: Estimate? = null
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

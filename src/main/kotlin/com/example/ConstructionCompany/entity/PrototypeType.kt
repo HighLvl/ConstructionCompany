@@ -13,4 +13,4 @@ class PrototypeType(
     @Basic
     var name: String? = null
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

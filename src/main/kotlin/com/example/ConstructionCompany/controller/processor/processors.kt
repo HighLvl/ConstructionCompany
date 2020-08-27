@@ -3,6 +3,7 @@ package com.example.ConstructionCompany.controller.processor
 import com.example.ConstructionCompany.applyBasePath
 import com.example.ConstructionCompany.controller.AbstractController
 import com.example.ConstructionCompany.entity.*
+import org.springframework.data.domain.Persistable
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.PagedModel
@@ -15,12 +16,12 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
 
-abstract class AbstractPagedModelProcessor<T : AbstractJpaPersistable<*>>(
+abstract class AbstractPagedModelProcessor<T : Persistable<*>>(
     entityClass: KClass<T>,
     private val processorHelper: ProcessorHelper
 ) : RepresentationModelProcessor<PagedModel<EntityModel<T>>> {
 
-    protected val entityClass: KClass<AbstractJpaPersistable<*>> = entityClass as KClass<AbstractJpaPersistable<*>>
+    protected val entityClass: KClass<Persistable<*>> = entityClass as KClass<Persistable<*>>
 
     override fun process(model: PagedModel<EntityModel<T>>): PagedModel<EntityModel<T>> {
         model.addManyToOneLinks()
@@ -33,7 +34,7 @@ abstract class AbstractPagedModelProcessor<T : AbstractJpaPersistable<*>>(
         val properties = processorHelper.getManyToOneProperties(entityClass)
         for (property in properties) {
             val entityControllerClass =
-                processorHelper.map(property.returnType.classifier as KClass<AbstractJpaPersistable<*>>)::class as KClass<AbstractController<*, *>>
+                processorHelper.map(property.returnType.classifier as KClass<Persistable<*>>)::class as KClass<AbstractController<*, *>>
             val requestMappingPath = requestMappingUrl(entityControllerClass).trimEnd('/')
             val relation = MANY_TO_ONE_PREFIX + "_" + property.name
             addManyToOneLink(requestMappingPath, relation)
@@ -71,7 +72,7 @@ abstract class AbstractPagedModelProcessor<T : AbstractJpaPersistable<*>>(
         property: KProperty1<T, *>,
         relation: String
     ) {
-        val persistable = (property.get(this.content!!) ?: return) as AbstractJpaPersistable<*>
+        val persistable = (property.get(this.content!!) ?: return) as Persistable<*>
         val id = persistable.id
         val getMappingPath = AbstractController<*, *>::getById.findAnnotation<GetMapping>()!!.value[0]
         this.add(applyBasePath(Link.of(requestMappingPath + getMappingPath).expand(id).withRel(relation)))
@@ -175,3 +176,7 @@ class WorkScheduleProcessor(processorHelper: ProcessorHelper) :
 @Component
 class WorkTypeProcessor(processorHelper: ProcessorHelper) :
     AbstractPagedModelProcessor<WorkType>(WorkType::class, processorHelper)
+
+@Component
+class ReportProcessor(processorHelper: ProcessorHelper) :
+    AbstractPagedModelProcessor<Report>(Report::class, processorHelper)

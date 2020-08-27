@@ -23,4 +23,4 @@ class WorkSchedule(
     @ManyToOne
     var workType: WorkType? = null
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

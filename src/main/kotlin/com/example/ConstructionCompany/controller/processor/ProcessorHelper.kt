@@ -1,9 +1,9 @@
 package com.example.ConstructionCompany.controller.processor
 
 import com.example.ConstructionCompany.controller.AbstractController
-import com.example.ConstructionCompany.entity.AbstractJpaPersistable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import org.springframework.data.domain.Persistable
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.RestController
 import kotlin.reflect.KClass
@@ -20,15 +20,15 @@ class ProcessorHelper {
     private val entityControllerMap by lazy {
         val controllerMap =
             context.getBeansWithAnnotation(RestController::class.java) as Map<String, AbstractController<*, *>>
-        val map = mutableMapOf<KClass<AbstractJpaPersistable<*>>, AbstractController<*, *>>()
+        val map = mutableMapOf<KClass<Persistable<*>>, AbstractController<*, *>>()
         for (controller in controllerMap.values) {
             map[controller.entityClass] = controller
         }
         map
     }
 
-    private val manyToOnePropertiesMap: Map<KClass<AbstractJpaPersistable<*>>, Set<KProperty1<*, *>>> by lazy {
-        val map = mutableMapOf<KClass<AbstractJpaPersistable<*>>, MutableSet<KProperty1<*, *>>>()
+    private val manyToOnePropertiesMap: Map<KClass<Persistable<*>>, Set<KProperty1<*, *>>> by lazy {
+        val map = mutableMapOf<KClass<Persistable<*>>, MutableSet<KProperty1<*, *>>>()
         entityControllerMap.keys.forEach { map[it] = mutableSetOf() }
         for (entity in entityControllerMap.keys) {
             val properties = entity::memberProperties.get()
@@ -42,8 +42,8 @@ class ProcessorHelper {
         map
     }
 
-    private val oneToManyFunctionsMap: Map<KClass<AbstractJpaPersistable<*>>, Set<Pair<KFunction<*>, String>>> by lazy {
-        val map = mutableMapOf<KClass<AbstractJpaPersistable<*>>, MutableSet<Pair<KFunction<*>, String>>>()
+    private val oneToManyFunctionsMap: Map<KClass<Persistable<*>>, Set<Pair<KFunction<*>, String>>> by lazy {
+        val map = mutableMapOf<KClass<Persistable<*>>, MutableSet<Pair<KFunction<*>, String>>>()
         entityControllerMap.keys.forEach { map[it] = mutableSetOf() }
         for (entry in manyToOnePropertiesMap.entries) {
             val controller = map(entry.key)
@@ -59,11 +59,11 @@ class ProcessorHelper {
         map
     }
 
-    fun getManyToOneProperties(kClass: KClass<AbstractJpaPersistable<*>>) = manyToOnePropertiesMap.getValue(kClass)
+    fun getManyToOneProperties(kClass: KClass<Persistable<*>>) = manyToOnePropertiesMap.getValue(kClass)
 
-    fun getOneToManyFunctions(kClass: KClass<AbstractJpaPersistable<*>>) = oneToManyFunctionsMap.getValue(kClass)
+    fun getOneToManyFunctions(kClass: KClass<Persistable<*>>) = oneToManyFunctionsMap.getValue(kClass)
 
-    fun map(kClass: KClass<AbstractJpaPersistable<*>>): AbstractController<*, *> {
+    fun map(kClass: KClass<Persistable<*>>): AbstractController<*, *> {
         return entityControllerMap.getValue(kClass)
     }
 

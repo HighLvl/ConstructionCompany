@@ -14,4 +14,4 @@ class MachineryType(
     var name: String? = null
 
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

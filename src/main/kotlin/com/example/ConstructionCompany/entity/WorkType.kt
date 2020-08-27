@@ -12,4 +12,4 @@ class WorkType(
     @Column(name = "name", nullable = false, length = 40)
     @Basic
     var name: String? = null
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

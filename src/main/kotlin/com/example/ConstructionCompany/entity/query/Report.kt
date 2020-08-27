@@ -1,35 +1,33 @@
 package com.example.ConstructionCompany.entity
 
+import com.example.ConstructionCompany.entity.query.ImmutablePersistable
 import org.hibernate.annotations.Immutable
+import org.hibernate.annotations.Subselect
 import java.sql.Date
+import java.time.LocalDate
 import javax.persistence.*
 
 @Entity
-@Immutable
-@Table(name = "report", schema = "public", catalog = "construction")
-class Report: AbstractJpaPersistable<Long>() {
+@Table(name = "report")
+class Report: ImmutablePersistable() {
 
-    @Id
-    @Column(columnDefinition = "BINARY(16)")
-    var id: Long? = null
-
-    @JoinColumn(name = "brigade_id", referencedColumnName = "id")
+    @JoinColumn(name = "brigade_id", foreignKey = ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @ManyToOne
     var brigade: Brigade? = null
 
-    @JoinColumn(name = "object_id", referencedColumnName = "id")
+    @JoinColumn(name = "object_id", foreignKey = ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @ManyToOne
-    var build_object : BuildObject? = null
+    var buildObject : BuildObject? = null
 
-    @JoinColumn(name = "work_type_id", referencedColumnName = "id")
+    @JoinColumn(name = "work_type_id", foreignKey = ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @ManyToOne
     var workType: WorkType? = null
 
     @Column(name = "start_date", nullable = true)
-    var startDate: Date? = null
+    var startDate: LocalDate? = null
 
     @Column(name = "finish_date", nullable = true)
-    var finishDate: Date? = null
+    var finishDate: LocalDate? = null
 
     @Column(name = "deadline", nullable = true)
     var deadline: Int? = null
@@ -37,7 +35,7 @@ class Report: AbstractJpaPersistable<Long>() {
     @Column(name = "time_overrun", nullable = true)
     var timeOverrun: Int? = null
 
-    @JoinColumn(name = "material_id", referencedColumnName = "id")
+    @JoinColumn(name = "material_id", foreignKey = ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @ManyToOne
     var material: Material? = null
 

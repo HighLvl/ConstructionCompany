@@ -23,4 +23,4 @@ class Staff(
     var chief: Staff? = null
 
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

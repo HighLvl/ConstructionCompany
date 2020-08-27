@@ -14,4 +14,4 @@ class Brigade(
     var title: Title? = null
 
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

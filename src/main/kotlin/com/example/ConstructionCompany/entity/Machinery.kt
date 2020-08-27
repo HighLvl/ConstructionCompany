@@ -17,4 +17,4 @@ class Machinery(
     @ManyToOne
     var management: Management? = null
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

@@ -1,6 +1,5 @@
 package com.example.ConstructionCompany.service.filter
 
-import com.example.ConstructionCompany.entity.AbstractJpaPersistable
 import cz.jirutka.rsql.parser.ast.ComparisonOperator
 import org.springframework.data.jpa.domain.Specification
 import java.time.LocalDate

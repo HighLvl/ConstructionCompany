@@ -17,4 +17,4 @@ class Customer(
     var phoneNumber: String? = null
 
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

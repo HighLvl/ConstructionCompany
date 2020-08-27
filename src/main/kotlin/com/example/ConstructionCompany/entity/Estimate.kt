@@ -17,4 +17,4 @@ class Estimate(
     @JoinColumn(name = "material_id", referencedColumnName = "id", nullable = false)
     @ManyToOne
     var material: Material? = null
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

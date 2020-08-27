@@ -11,7 +11,8 @@ select cons_amount - est_amount;
 $$ language sql;
 
 create or replace view report as
-select brigade_id,
+select row_number() over() as id,
+       brigade_id,
        object_id,
        work_type_id,
        start_date,

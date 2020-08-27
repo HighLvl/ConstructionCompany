@@ -14,4 +14,4 @@ class Prototype(
     @ManyToOne
     var prototypeType: PrototypeType? = null
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

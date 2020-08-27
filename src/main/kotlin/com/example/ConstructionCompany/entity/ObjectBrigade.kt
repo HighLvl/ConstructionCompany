@@ -1,6 +1,5 @@
 package com.example.ConstructionCompany.entity
 
-import java.sql.Date
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -28,4 +27,4 @@ class ObjectBrigade(
     @ManyToOne
     var workSchedule: WorkSchedule? = null
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

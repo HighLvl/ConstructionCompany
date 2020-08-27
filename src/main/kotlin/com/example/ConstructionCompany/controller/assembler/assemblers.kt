@@ -1,6 +1,7 @@
 package com.example.ConstructionCompany.controller.assembler
 
 import com.example.ConstructionCompany.entity.*
+import org.springframework.data.domain.Persistable
 import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.server.RepresentationModelAssembler
@@ -74,7 +75,7 @@ class BrigadeModelAssembler : AbstractModelAssembler<Brigade>()
 @Component
 class ReportModelAssembler : AbstractModelAssembler<Report>()
 
-abstract class AbstractModelAssembler<T : AbstractJpaPersistable<*>> :
+abstract class AbstractModelAssembler<T : Persistable<*>> :
     RepresentationModelAssembler<T, EntityModel<T>> {
     override fun toCollectionModel(entities: MutableIterable<T>): CollectionModel<EntityModel<T>> {
         Assert.notNull(entities, "entities must not be null!")

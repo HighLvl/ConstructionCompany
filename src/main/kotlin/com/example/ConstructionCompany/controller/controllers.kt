@@ -11,6 +11,7 @@ import cz.jirutka.rsql.parser.RSQLParser
 import cz.jirutka.rsql.parser.ast.Node
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.EntityModel
@@ -486,12 +487,12 @@ class WorkScheduleController(
     }
 }
 
-abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<ID>>(
+abstract class AbstractController<ID : Serializable, T : Persistable<ID>>(
     private val service: AbstractService<T, ID>,
     private val assembler: AbstractModelAssembler<T>
 ) {
     val entityClass =
-        ((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[1] as Class<AbstractJpaPersistable<*>>).kotlin
+        ((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[1] as Class<Persistable<*>>).kotlin
 
 
     @GetMapping("/{id}")
@@ -548,12 +549,12 @@ abstract class AbstractController<ID : Serializable, T : AbstractJpaPersistable<
         return toResponse(pagedAssembler, page, assembler, request)
     }
 
-    protected fun <S: AbstractJpaPersistable<*>>convertToSpecifications(filter: String): Specification<S>? {
+    protected fun <S: Persistable<*>>convertToSpecifications(filter: String): Specification<S>? {
         val rootNode: Node = RSQLParser().parse(filter)
         return rootNode.accept(CustomRsqlVisitor())
     }
 
-    protected fun <T: AbstractJpaPersistable<*>>toResponse(
+    protected fun <T: Persistable<*>>toResponse(
         pagedAssembler: PagedResourcesAssembler<T>,
         page: Page<T>,
         assembler: AbstractModelAssembler<T>,

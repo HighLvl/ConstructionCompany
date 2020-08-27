@@ -12,4 +12,4 @@ class MachineryModel(
     @JoinColumn(name = "type_id", referencedColumnName = "id", nullable = false)
     @ManyToOne
     var machineryType: MachineryType? = null
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

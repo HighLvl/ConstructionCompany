@@ -1,6 +1,5 @@
 package com.example.ConstructionCompany.entity
 
-import java.sql.Date
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -24,4 +23,4 @@ class ObjectMachinery(
     @ManyToOne
     var machinery: Machinery? = null
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

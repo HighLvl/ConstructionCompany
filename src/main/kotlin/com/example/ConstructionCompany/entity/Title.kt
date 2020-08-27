@@ -14,4 +14,4 @@ class Title(
     @ManyToOne
     var titleCategory: TitleCategory? = null
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

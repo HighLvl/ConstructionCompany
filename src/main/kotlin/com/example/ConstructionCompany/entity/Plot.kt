@@ -17,4 +17,4 @@ class Plot(
     @ManyToOne
     var management: Management? = null
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()

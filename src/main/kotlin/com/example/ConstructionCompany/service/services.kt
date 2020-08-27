@@ -4,13 +4,14 @@ import com.example.ConstructionCompany.entity.*
 import com.example.ConstructionCompany.repository.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.Serializable
 
 
-abstract class AbstractService<T : AbstractJpaPersistable<ID>, ID : Serializable>(private val repository: AbstractRepository<T, ID>) {
+abstract class AbstractService<T : Persistable<ID>, ID : Serializable>(private val repository: AbstractRepository<T, ID>) {
     @Transactional
     open fun findById(id: ID, pageable: Pageable): Page<T> {
         return repository.findById(id, pageable)

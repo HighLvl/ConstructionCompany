@@ -1,6 +1,5 @@
 package com.example.ConstructionCompany.entity
 
-import java.sql.Date
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -29,4 +28,4 @@ class BuildObject(
     var customer: Customer? = null
 
 
-) : AbstractJpaPersistable<Long>()
+) : MutablePersistable<Long>()
