@@ -9,6 +9,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import cz.jirutka.rsql.parser.RSQLParser
 import cz.jirutka.rsql.parser.ast.Node
+import org.hibernate.JDBCException
+import org.hibernate.exception.ConstraintViolationException
+import org.hibernate.exception.GenericJDBCException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Persistable
@@ -17,6 +20,7 @@ import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.PagedModel
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.io.Serializable
@@ -520,7 +524,7 @@ abstract class AbstractController<ID : Serializable, T : Persistable<ID>>(
     @PutMapping("/collection")
     fun saveAll(
         @RequestBody json: String
-    ): ResponseEntity<MutableIterable<T>> {
+    ): ResponseEntity<*> {
         val objectMapper = jacksonObjectMapper()
         objectMapper.registerModule(JavaTimeModule())
         val typeFactory = objectMapper.typeFactory
@@ -528,7 +532,11 @@ abstract class AbstractController<ID : Serializable, T : Persistable<ID>>(
             json,
             typeFactory.constructCollectionType(Collection::class.java, entityClass.java)
         )
-        return ResponseEntity.ok(service.saveAll(collection))
+        return try {
+            ResponseEntity.ok(service.saveAll(collection))
+        } catch (e: Exception) {
+            ResponseEntity.badRequest().body((e.cause as JDBCException).sqlException.cause?.message.orEmpty())
+        }
     }
 
 
