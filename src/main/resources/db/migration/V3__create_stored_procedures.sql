@@ -27,6 +27,6 @@ from object_brigade ob
          join work_shedule
               on (work_shedule_id = work_shedule.id)
          join material_consumption
-              on (ob.id = material_consumption.id)
+              on (ob.id = material_consumption.brigade_object_id)
          join estimate
               on (estimate.id = estimate_id);
