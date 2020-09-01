@@ -1,6 +1,7 @@
 package com.example.ConstructionCompany.service
 
 import com.example.ConstructionCompany.entity.*
+import com.example.ConstructionCompany.entity.query.MaterialConsumptionReport
 import com.example.ConstructionCompany.repository.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -234,3 +235,10 @@ class WorkTypeService(private val repository: WorkTypeRepository) : AbstractServ
 
 @Service
 class ReportService(private val repository: ReportRepository) : AbstractService<Report, Long>(repository)
+
+@Service
+class MaterialConsumptionReportService(private val repository: MaterialConsumptionReportRepository) : AbstractService<MaterialConsumptionReport, Long>(repository) {
+    fun findAllByReportId(id: Long, pageable: Pageable): Page<MaterialConsumptionReport> {
+        return repository.findAllByReportId(id, pageable)
+    }
+}

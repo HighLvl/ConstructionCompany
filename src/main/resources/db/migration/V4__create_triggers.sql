@@ -13,6 +13,17 @@ begin
     then
         raise exception 'Бригада должна состоять только из рабочих.';
     end if;
+
+    /*рабочий не может работать одновременно в нескольких бригадах и начать работу в той же бригаде, не закончив предыдущую*/
+    if exists(
+            select *
+            from brigade_members m
+            where new.staff_id = m.staff_id and new.id != m.id
+              and (new.start_date, new.finish_date) overlaps (m.start_date, m.finish_date)
+        )
+    then
+        raise exception 'Даты не должны пересекаться.';
+    end if;
     return new;
 end;
 $$ language plpgsql;
@@ -41,9 +52,10 @@ begin
 
     if exists
         (
-            select  *
+            select *
             from management
-            where new.mng_id = management.id and management.chief_id = new.chief_id
+            where new.mng_id = management.id
+              and management.chief_id = new.chief_id
         )
     then
         raise exception 'Сотрудник не может подчиняться самому себе';
@@ -86,9 +98,10 @@ begin
 
     if exists
         (
-            select  *
+            select *
             from plot
-            where plot.mng_id = new.id and plot.chief_id = new.chief_id
+            where plot.mng_id = new.id
+              and plot.chief_id = new.chief_id
         )
     then
         raise exception 'Сотрудник не может подчиняться самому себе';

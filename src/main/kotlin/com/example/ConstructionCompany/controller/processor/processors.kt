@@ -3,6 +3,7 @@ package com.example.ConstructionCompany.controller.processor
 import com.example.ConstructionCompany.applyBasePath
 import com.example.ConstructionCompany.controller.AbstractController
 import com.example.ConstructionCompany.entity.*
+import com.example.ConstructionCompany.entity.query.MaterialConsumptionReport
 import org.springframework.data.domain.Persistable
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
@@ -180,3 +181,7 @@ class WorkTypeProcessor(processorHelper: ProcessorHelper) :
 @Component
 class ReportProcessor(processorHelper: ProcessorHelper) :
     AbstractPagedModelProcessor<Report>(Report::class, processorHelper)
+
+@Component
+class MaterialConsumptionReportModelProcessor(processorHelper: ProcessorHelper):
+        AbstractPagedModelProcessor<MaterialConsumptionReport>(MaterialConsumptionReport::class, processorHelper)

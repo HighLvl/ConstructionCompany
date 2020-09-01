@@ -3,6 +3,7 @@ package com.example.ConstructionCompany.controller
 import com.example.ConstructionCompany.applyBasePath
 import com.example.ConstructionCompany.controller.assembler.*
 import com.example.ConstructionCompany.entity.*
+import com.example.ConstructionCompany.entity.query.MaterialConsumptionReport
 import com.example.ConstructionCompany.service.*
 import com.example.ConstructionCompany.service.filter.CustomRsqlVisitor
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -585,3 +586,21 @@ class ReportController(
     private val service: ReportService,
     private val assembler: ReportModelAssembler
 ) : AbstractController<Long, Report>(service, assembler)
+
+@RestController
+@RequestMapping(value = ["/materialConsumptionReport"])
+class MaterialConsumptionReportController(
+    private val service: MaterialConsumptionReportService,
+    private val assembler: MaterialConsumptionReportModelAssembler
+) : AbstractController<Long, MaterialConsumptionReport>(service, assembler) {
+    @GetMapping("/report/{id}")
+    fun findAllByReportId(
+        @PathVariable id: Long,
+        pageable: Pageable,
+        pagedAssembler: PagedResourcesAssembler<MaterialConsumptionReport>,
+        request: HttpServletRequest
+    ): ResponseEntity<PagedModel<EntityModel<MaterialConsumptionReport>>> {
+        val page = service.findAllByReportId(id, pageable)
+        return toResponse(pagedAssembler, page, assembler, request)
+    }
+}

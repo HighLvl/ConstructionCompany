@@ -1,6 +1,7 @@
 package com.example.ConstructionCompany.repository
 
 import com.example.ConstructionCompany.entity.*
+import com.example.ConstructionCompany.entity.query.MaterialConsumptionReport
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
@@ -114,3 +115,7 @@ interface WorkScheduleRepository : AbstractRepository<WorkSchedule, Long> {
 interface WorkTypeRepository : AbstractRepository<WorkType, Long>
 
 interface ReportRepository : AbstractRepository<Report, Long>
+
+interface MaterialConsumptionReportRepository : AbstractRepository<MaterialConsumptionReport, Long> {
+    fun findAllByReportId(id: Long, pageable: Pageable): Page<MaterialConsumptionReport>
+}

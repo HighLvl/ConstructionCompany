@@ -11,14 +11,21 @@ select cons_amount - est_amount;
 $$ language sql;
 
 create or replace view report as
-select row_number() over() as id,
+select ob.id                                                   as id,
        brigade_id,
        object_id,
        work_type_id,
        start_date,
        finish_date,
        deadline,
-       compute_time_overrun(start_date, finish_date, deadline)           as time_overrun,
+       compute_time_overrun(start_date, finish_date, deadline) as time_overrun
+from object_brigade ob
+         join work_shedule
+              on (work_shedule_id = work_shedule.id);
+
+create or replace view material_consumption_report as
+select row_number() over ()                                              as id,
+       ob.id                                                             as report_id,
        material_id,
        material_consumption.amount                                       as cons_amount,
        estimate.amount                                                   as est_amount,
@@ -30,3 +37,4 @@ from object_brigade ob
               on (ob.id = material_consumption.brigade_object_id)
          join estimate
               on (estimate.id = estimate_id);
+

@@ -1,6 +1,7 @@
 package com.example.ConstructionCompany.controller.assembler
 
 import com.example.ConstructionCompany.entity.*
+import com.example.ConstructionCompany.entity.query.MaterialConsumptionReport
 import org.springframework.data.domain.Persistable
 import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.EntityModel
@@ -74,6 +75,9 @@ class BrigadeModelAssembler : AbstractModelAssembler<Brigade>()
 
 @Component
 class ReportModelAssembler : AbstractModelAssembler<Report>()
+
+@Component
+class MaterialConsumptionReportModelAssembler : AbstractModelAssembler<MaterialConsumptionReport>()
 
 abstract class AbstractModelAssembler<T : Persistable<*>> :
     RepresentationModelAssembler<T, EntityModel<T>> {
