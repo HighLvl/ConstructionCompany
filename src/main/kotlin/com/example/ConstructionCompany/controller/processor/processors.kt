@@ -17,6 +17,8 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
 
+/*Добавляет в PagedModel ссылки на ссылаемые и ссылающиеся таблицы.
+* Для каждой EntityModel в PagedModel добавляет ссылки на конкретные ссылаемые и ссылающиеся сушности*/
 abstract class AbstractPagedModelProcessor<T : Persistable<*>>(
     entityClass: KClass<T>,
     private val processorHelper: ProcessorHelper

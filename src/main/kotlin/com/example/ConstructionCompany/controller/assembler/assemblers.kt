@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component
 import org.springframework.util.Assert
 import java.util.*
 
+/* Создание EntityModel каждой сущности */
 @Component
 class TitleCategoryModelAssembler : AbstractModelAssembler<TitleCategory>()
 

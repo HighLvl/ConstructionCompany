@@ -15,7 +15,7 @@ import java.io.Serializable
 import java.util.*
 import javax.persistence.*
 
-
+/*Абстрактный класс для таблиц*/
 @MappedSuperclass
 abstract class MutablePersistable<T : Serializable> : Persistable<T> {
     @Id

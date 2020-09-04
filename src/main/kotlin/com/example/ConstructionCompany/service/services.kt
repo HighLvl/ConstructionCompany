@@ -11,8 +11,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.Serializable
 
-
+/*Сервис, добавляющий поддержку транзакций*/
 abstract class AbstractService<T : Persistable<ID>, ID : Serializable>(private val repository: AbstractRepository<T, ID>) {
+    //TODO remove @Transactional from non transactional functions
     @Transactional
     open fun findById(id: ID, pageable: Pageable): Page<T> {
         return repository.findById(id, pageable)

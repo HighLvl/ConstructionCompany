@@ -9,6 +9,7 @@ import org.springframework.data.domain.Persistable
 import org.springframework.data.util.ProxyUtils
 import javax.persistence.*
 
+/*Абстрактный класс для view*/
 @MappedSuperclass
 @Immutable
 abstract class ImmutablePersistable : Persistable<Long> {

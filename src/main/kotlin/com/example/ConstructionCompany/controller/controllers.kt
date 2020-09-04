@@ -28,6 +28,96 @@ import java.io.Serializable
 import java.lang.reflect.ParameterizedType
 import javax.servlet.http.HttpServletRequest
 
+/*Абстрактный контроллер с основными crud операциями*/
+abstract class AbstractController<ID : Serializable, T : Persistable<ID>>(
+    private val service: AbstractService<T, ID>,
+    private val assembler: AbstractModelAssembler<T>
+) {
+    val entityClass =
+        ((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[1] as Class<Persistable<*>>).kotlin
+
+
+    @GetMapping("/{id}")
+    fun getById(
+        @PathVariable id: ID,
+        pageable: Pageable,
+        pagedAssembler: PagedResourcesAssembler<T>,
+        request: HttpServletRequest
+    ): ResponseEntity<PagedModel<EntityModel<T>>> {
+        val page = service.findById(id, pageable)
+        return toResponse(pagedAssembler, page, assembler, request)
+    }
+
+
+    @GetMapping("/", "")
+    fun getAll(
+        pageable: Pageable,
+        pagedAssembler: PagedResourcesAssembler<T>,
+        request: HttpServletRequest
+    ): ResponseEntity<PagedModel<EntityModel<T>>> {
+        val page = service.findAll(pageable)
+        return toResponse(pagedAssembler, page, assembler, request)
+    }
+
+    @PutMapping("/collection")
+    fun saveAll(
+        @RequestBody json: String
+    ): ResponseEntity<*> {
+        val objectMapper = jacksonObjectMapper()
+        objectMapper.registerModule(JavaTimeModule())
+        val typeFactory = objectMapper.typeFactory
+        val collection = objectMapper.readValue<Collection<T>>(
+            json,
+            typeFactory.constructCollectionType(Collection::class.java, entityClass.java)
+        )
+        return try {
+            ResponseEntity.ok(service.saveAll(collection))
+        } catch (e: Exception) {
+            ResponseEntity.badRequest().body((e.cause as JDBCException).sqlException.cause?.message.orEmpty())
+        }
+    }
+
+
+    @DeleteMapping("/collection")
+    fun deleteAll(
+        @RequestParam("id") ids: Collection<ID>
+    ) = service.deleteByIdIn(ids).let {
+        ResponseEntity.ok().build<Any>()
+    }
+
+    @GetMapping("/search")
+    @ResponseBody
+    open fun findAllByRsql(@RequestParam("filter") filter: String,
+                           pageable: Pageable,
+                           pagedAssembler: PagedResourcesAssembler<T>,
+                           request: HttpServletRequest): ResponseEntity<PagedModel<EntityModel<T>>> {
+        val page = service.findAll(convertToSpecifications(filter), pageable)
+        return toResponse(pagedAssembler, page, assembler, request)
+    }
+
+    protected fun <S: Persistable<*>>convertToSpecifications(filter: String): Specification<S>? {
+        val rootNode: Node = RSQLParser().parse(filter)
+        return rootNode.accept(CustomRsqlVisitor())
+    }
+
+    protected fun <T: Persistable<*>>toResponse(
+        pagedAssembler: PagedResourcesAssembler<T>,
+        page: Page<T>,
+        assembler: AbstractModelAssembler<T>,
+        request: HttpServletRequest
+    ): ResponseEntity<PagedModel<EntityModel<T>>> {
+        return ResponseEntity.ok(
+            pagedAssembler.toModel(
+                page,
+                assembler,
+                applyBasePath(Link.of(request.servletPath))
+            )
+        )
+
+    }
+}
+
+/*Реализации контроллеров добавляют методы для поиска ссылающихся сущностей по ссылаемому id*/
 
 @RestController
 @RequestMapping(value = ["/brigades"])
@@ -492,93 +582,6 @@ class WorkScheduleController(
     }
 }
 
-abstract class AbstractController<ID : Serializable, T : Persistable<ID>>(
-    private val service: AbstractService<T, ID>,
-    private val assembler: AbstractModelAssembler<T>
-) {
-    val entityClass =
-        ((javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[1] as Class<Persistable<*>>).kotlin
-
-
-    @GetMapping("/{id}")
-    fun getById(
-        @PathVariable id: ID,
-        pageable: Pageable,
-        pagedAssembler: PagedResourcesAssembler<T>,
-        request: HttpServletRequest
-    ): ResponseEntity<PagedModel<EntityModel<T>>> {
-        val page = service.findById(id, pageable)
-        return toResponse(pagedAssembler, page, assembler, request)
-    }
-
-
-    @GetMapping("/", "")
-    fun getAll(
-        pageable: Pageable,
-        pagedAssembler: PagedResourcesAssembler<T>,
-        request: HttpServletRequest
-    ): ResponseEntity<PagedModel<EntityModel<T>>> {
-        val page = service.findAll(pageable)
-        return toResponse(pagedAssembler, page, assembler, request)
-    }
-
-    @PutMapping("/collection")
-    fun saveAll(
-        @RequestBody json: String
-    ): ResponseEntity<*> {
-        val objectMapper = jacksonObjectMapper()
-        objectMapper.registerModule(JavaTimeModule())
-        val typeFactory = objectMapper.typeFactory
-        val collection = objectMapper.readValue<Collection<T>>(
-            json,
-            typeFactory.constructCollectionType(Collection::class.java, entityClass.java)
-        )
-        return try {
-            ResponseEntity.ok(service.saveAll(collection))
-        } catch (e: Exception) {
-            ResponseEntity.badRequest().body((e.cause as JDBCException).sqlException.cause?.message.orEmpty())
-        }
-    }
-
-
-    @DeleteMapping("/collection")
-    fun deleteAll(
-        @RequestParam("id") ids: Collection<ID>
-    ) = service.deleteByIdIn(ids).let {
-        ResponseEntity.ok().build<Any>()
-    }
-
-    @GetMapping("/search")
-    @ResponseBody
-    open fun findAllByRsql(@RequestParam("filter") filter: String,
-                           pageable: Pageable,
-                           pagedAssembler: PagedResourcesAssembler<T>,
-                           request: HttpServletRequest): ResponseEntity<PagedModel<EntityModel<T>>> {
-        val page = service.findAll(convertToSpecifications(filter), pageable)
-        return toResponse(pagedAssembler, page, assembler, request)
-    }
-
-    protected fun <S: Persistable<*>>convertToSpecifications(filter: String): Specification<S>? {
-        val rootNode: Node = RSQLParser().parse(filter)
-        return rootNode.accept(CustomRsqlVisitor())
-    }
-
-    protected fun <T: Persistable<*>>toResponse(
-        pagedAssembler: PagedResourcesAssembler<T>,
-        page: Page<T>,
-        assembler: AbstractModelAssembler<T>,
-        request: HttpServletRequest
-    ): ResponseEntity<PagedModel<EntityModel<T>>> {
-        return ResponseEntity.ok(
-            pagedAssembler.toModel(
-                page,
-                assembler,
-                applyBasePath(Link.of(request.servletPath))
-            )
-        )
-
-    }
-}
 
 @RestController
 @RequestMapping(value = ["/report"])

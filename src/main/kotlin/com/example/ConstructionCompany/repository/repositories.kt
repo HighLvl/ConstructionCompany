@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.data.repository.PagingAndSortingRepository
 
+/*Репозиторий с общими операциями*/
 @NoRepositoryBean
 interface AbstractRepository<T, ID> : PagingAndSortingRepository<T, ID> {
     fun findById(id: ID, pageable: Pageable): Page<T>
@@ -15,6 +16,7 @@ interface AbstractRepository<T, ID> : PagingAndSortingRepository<T, ID> {
     fun findAll(spec: Specification<T>?, pageable: Pageable): Page<T>
 }
 
+/*Конкретные репозитории добавляют функции для фильтрации ссылающихся сущностей по конкретному id*/
 interface BrigadeMemberRepository : AbstractRepository<BrigadeMember, Long> {
     fun findAllByBrigadeId(id: Long, pageable: Pageable): Page<BrigadeMember>
     fun findAllByStaffId(id: Long, pageable: Pageable): Page<BrigadeMember>

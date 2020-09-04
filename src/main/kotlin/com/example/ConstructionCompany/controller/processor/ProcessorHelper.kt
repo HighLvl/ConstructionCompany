@@ -27,6 +27,7 @@ class ProcessorHelper {
         map
     }
 
+    /*Для каждого класса сущности создается множество property ссылаемых сущностей*/
     private val manyToOnePropertiesMap: Map<KClass<Persistable<*>>, Set<KProperty1<*, *>>> by lazy {
         val map = mutableMapOf<KClass<Persistable<*>>, MutableSet<KProperty1<*, *>>>()
         entityControllerMap.keys.forEach { map[it] = mutableSetOf() }
@@ -42,6 +43,7 @@ class ProcessorHelper {
         map
     }
 
+    /*Для каждого класса сущности создается множество, содержащее функции(ищут записи по id) контроллеров и названия property, ссылающихся сущностей*/
     private val oneToManyFunctionsMap: Map<KClass<Persistable<*>>, Set<Pair<KFunction<*>, String>>> by lazy {
         val map = mutableMapOf<KClass<Persistable<*>>, MutableSet<Pair<KFunction<*>, String>>>()
         entityControllerMap.keys.forEach { map[it] = mutableSetOf() }
@@ -63,6 +65,7 @@ class ProcessorHelper {
 
     fun getOneToManyFunctions(kClass: KClass<Persistable<*>>) = oneToManyFunctionsMap.getValue(kClass)
 
+    /*Отображает класс в контроллер*/
     fun map(kClass: KClass<Persistable<*>>): AbstractController<*, *> {
         return entityControllerMap.getValue(kClass)
     }
