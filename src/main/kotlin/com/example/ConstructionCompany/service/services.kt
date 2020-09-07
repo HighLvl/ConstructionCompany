@@ -13,12 +13,9 @@ import java.io.Serializable
 
 /*Сервис, добавляющий поддержку транзакций*/
 abstract class AbstractService<T : Persistable<ID>, ID : Serializable>(private val repository: AbstractRepository<T, ID>) {
-    //TODO remove @Transactional from non transactional functions
-    @Transactional
     open fun findById(id: ID, pageable: Pageable): Page<T> {
         return repository.findById(id, pageable)
     }
-
 
     @Transactional
     open fun deleteByIdIn(ids: Collection<ID>) {
@@ -30,12 +27,10 @@ abstract class AbstractService<T : Persistable<ID>, ID : Serializable>(private v
         return repository.saveAll(collection)
     }
 
-    @Transactional
     open fun findAll(pageable: Pageable): Page<T> {
         return repository.findAll(pageable)
     }
 
-    @Transactional
     open fun findAll(spec: Specification<T>?, pageable: Pageable): Page<T> {
         return repository.findAll(spec, pageable)
     }
